@@ -356,7 +356,7 @@ class ConferenceApi(remote.Service):
         # put display names in a dict for easier fetching
         names = {}
         for profile in profiles:
-            names[profile.userId] = profile.displayName
+            names[profile.key.id()] = profile.displayName
 
         # return individual ConferenceForm object per Conference
         return ConferenceForms(
@@ -396,7 +396,6 @@ class ConferenceApi(remote.Service):
         # create new Profile if not there
         if not profile:
             profile = Profile(
-                userId = user_id,
                 key = p_key,
                 displayName = user.nickname(),
                 mainEmail= user.email(),
@@ -549,7 +548,7 @@ class ConferenceApi(remote.Service):
         # put display names in a dict for easier fetching
         names = {}
         for profile in profiles:
-            names[profile.userId] = profile.displayName
+            names[profile.key.id()] = profile.displayName
 
         # return set of ConferenceForm objects per Conference
         return ConferenceForms(items=[self._copyConferenceToForm(conf, names[conf.organizerUserId])\
