@@ -12,15 +12,6 @@ created by wesc on 2014 apr 21
 
 __author__ = 'wesc+api@google.com (Wesley Chun)'
 
-# DONE: 1) servlet: taskqueue email conference registration confirmation
-# DONE: 2) servlet: cron job set announcements in memcache
-# DONE: 3a) queryConference -- search by city, topic, month
-# DONE: 3b) queryConference -- inequality filter on maxAttendees
-# TODO: 3c) NONSPEC queryConference -- search by conference name
-# DONE: 4) get web/JS UI working
-# TODO: 5) unit tests
-# DONE: 6) make transactional the things that need to be
-# TODO: 7) NONSPEC exercise: deleteConference() -- remove conf & all registrations
 
 from datetime import datetime
 import json
@@ -189,9 +180,6 @@ class ConferenceApi(remote.Service):
         c_key = ndb.Key(Conference, c_id, parent=p_key)
         data['key'] = c_key
         data['organizerUserId'] = request.organizerUserId = user_id
-
-        # TODO: look-up to see if Conf exists yet, and if so
-        # don't create it? If not, it will allow dupe confs
 
         # create Conference, send email to organizer confirming
         # creation of Conference & return (modified) ConferenceForm
@@ -447,19 +435,27 @@ class ConferenceApi(remote.Service):
     @staticmethod
     def _cacheAnnouncement():
         """Create Announcement & assign to memcache; used by
-        memcache cron job & dummy method putAnnouncement().
+        memcache cron job & putAnnouncement().
         """
         confs = Conference.query(ndb.AND(
             Conference.seatsAvailable <= 5,
             Conference.seatsAvailable > 0)
         ).fetch(projection=[Conference.name])
-        announcement = '%s %s' % (
-            'Last chance to attend! The following conferences '
-            'are nearly sold out:',
-            ', '.join(conf.name for conf in confs)
-        ) if confs else ""
-        memcache.set(MEMCACHE_ANNOUNCEMENTS_KEY, announcement) \
-            if announcement else memcache.delete(MEMCACHE_ANNOUNCEMENTS_KEY)
+
+        if confs:
+            # If there are almost sold out conferences,
+            # format announcement and set it in memcache
+            announcement = '%s %s' % (
+                'Last chance to attend! The following conferences '
+                'are nearly sold out:',
+                ', '.join(conf.name for conf in confs))
+            memcache.set(MEMCACHE_ANNOUNCEMENTS_KEY, announcement)
+        else:
+            # If there are no sold out conferences,
+            # delete the memcache announcements entry
+            announcement = ""
+            memcache.delete(MEMCACHE_ANNOUNCEMENTS_KEY)
+
         return announcement
 
 
@@ -475,9 +471,7 @@ class ConferenceApi(remote.Service):
             path='conference/announcement/put',
             http_method='GET', name='putAnnouncement')
     def putAnnouncement(self, request):
-        """Put Announcement into memcache; dummy method until taskqueue
-        functionality working.
-        """
+        """Put Announcement into memcache"""
         return StringMessage(data=self._cacheAnnouncement())
 
 

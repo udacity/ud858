@@ -19,9 +19,8 @@ App Engine application for the Udacity training course.
 1. Update the value of CLIENT_ID in `static/js/app.js` to the Web client ID
 1. (Optional) Mark the configuration files as unchanged as follows:
    `$ git update-index --assume-unchanged app.yaml settings.py static/js/app.js`
-1. Run the app with the devserver using `dev_appserver.py DIR`, and ensure it's running by visiting
-   your local server's address (by default [localhost:8080][5].)
-1. Generate your client library(ies) with [the endpoints tool][6].
+1. Run the app with the devserver using `dev_appserver.py DIR`, and ensure it's running by visiting your local server's address (by default [localhost:8080][5].)
+1. (Optional) Generate your client library(ies) with [the endpoints tool][6].
 1. Deploy your application.
 
 
