@@ -14,9 +14,6 @@ __author__ = 'wesc+api@google.com (Wesley Chun)'
 
 
 from datetime import datetime
-import json
-import os
-import time
 
 import endpoints
 from protorpc import messages
@@ -25,7 +22,6 @@ from protorpc import remote
 
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
-from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from models import ConflictException
@@ -46,10 +42,13 @@ from settings import ANDROID_CLIENT_ID
 from settings import IOS_CLIENT_ID
 from settings import ANDROID_AUDIENCE
 
+from utils import getUserId
+
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 MEMCACHE_ANNOUNCEMENTS_KEY = "RECENT_ANNOUNCEMENTS"
-
+ANNOUNCEMENT_TPL = ('Last chance to attend! The following conferences '
+                    'are nearly sold out: %s')
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 DEFAULTS = {
@@ -88,31 +87,6 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def _getUserId():
-    """A workaround implementation for getting userid."""
-    auth = os.getenv('HTTP_AUTHORIZATION')
-    bearer, token = auth.split()
-    token_type = 'id_token'
-    if 'OAUTH_USER_ID' in os.environ:
-        token_type = 'access_token'
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?%s=%s'
-           % (token_type, token))
-    user = {}
-    wait = 1
-    for i in range(3):
-        resp = urlfetch.fetch(url)
-        if resp.status_code == 200:
-            user = json.loads(resp.content)
-            break
-        elif resp.status_code == 400 and 'invalid_token' in resp.content:
-            url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?%s=%s'
-                   % ('access_token', token))
-        else:
-            time.sleep(wait)
-            wait = wait + i
-    return user.get('user_id', '')
-
-
 @endpoints.api(name='conference', version='v1', audiences=[ANDROID_AUDIENCE],
     allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID],
     scopes=[EMAIL_SCOPE])
@@ -145,7 +119,7 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = _getUserId()
+        user_id = getUserId(user)
 
         if not request.name:
             raise endpoints.BadRequestException("Conference 'name' field required")
@@ -196,7 +170,7 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = _getUserId()
+        user_id = getUserId(user)
 
         # copy ConferenceForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name) for field in request.all_fields()}
@@ -270,10 +244,11 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
+        user_id = getUserId(user)
 
         # create ancestor query for all key matches for this user
-        confs = Conference.query(ancestor=ndb.Key(Profile, _getUserId()))
-        prof = ndb.Key(Profile, _getUserId()).get()
+        confs = Conference.query(ancestor=ndb.Key(Profile, user_id))
+        prof = ndb.Key(Profile, user_id).get()
         # return set of ConferenceForm objects per Conference
         return ConferenceForms(
             items=[self._copyConferenceToForm(conf, getattr(prof, 'displayName')) for conf in confs]
@@ -378,7 +353,7 @@ class ConferenceApi(remote.Service):
             raise endpoints.UnauthorizedException('Authorization required')
 
         # get Profile from datastore
-        user_id = _getUserId()
+        user_id = getUserId(user)
         p_key = ndb.Key(Profile, user_id)
         profile = p_key.get()
         # create new Profile if not there
@@ -445,9 +420,7 @@ class ConferenceApi(remote.Service):
         if confs:
             # If there are almost sold out conferences,
             # format announcement and set it in memcache
-            announcement = '%s %s' % (
-                'Last chance to attend! The following conferences '
-                'are nearly sold out:',
+            announcement = ANNOUNCEMENT_TPL % (
                 ', '.join(conf.name for conf in confs))
             memcache.set(MEMCACHE_ANNOUNCEMENTS_KEY, announcement)
         else:
