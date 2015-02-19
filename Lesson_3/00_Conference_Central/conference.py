@@ -14,16 +14,12 @@ __author__ = 'wesc+api@google.com (Wesley Chun)'
 
 
 from datetime import datetime
-import json
-import os
-import time
 
 import endpoints
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
 
-from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from models import Profile
@@ -37,31 +33,6 @@ EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-def _getUserId():
-    """A workaround implementation for getting userid."""
-    auth = os.getenv('HTTP_AUTHORIZATION')
-    bearer, token = auth.split()
-    token_type = 'id_token'
-    if 'OAUTH_USER_ID' in os.environ:
-        token_type = 'access_token'
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?%s=%s'
-           % (token_type, token))
-    user = {}
-    wait = 1
-    for i in range(3):
-        resp = urlfetch.fetch(url)
-        if resp.status_code == 200:
-            user = json.loads(resp.content)
-            break
-        elif resp.status_code == 400 and 'invalid_token' in resp.content:
-            url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?%s=%s'
-                   % ('access_token', token))
-        else:
-            time.sleep(wait)
-            wait = wait + i
-    return user.get('user_id', '')
 
 
 @endpoints.api( name='conference',
@@ -95,15 +66,17 @@ class ConferenceApi(remote.Service):
             raise endpoints.UnauthorizedException('Authorization required')
 
         # TODO 1
-        # step 1. get user id by calling _getUserId() (no arguments needed)
-        # step 2. create a new key of kind Profile from the id
+        # step 1. copy utils.py from additions folder to this folder
+        #         and import getUserId from it
+        # step 2. get user id by calling getUserId(user)
+        # step 3. create a new key of kind Profile from the id
 
         # TODO 3
         # get the entity from datastore by using get() on the key
         profile = None
         if not profile:
             profile = Profile(
-                key = None, # TODO 1 step 3. replace with the key from step 2
+                key = None, # TODO 1 step 4. replace with the key from step 3
                 displayName = user.nickname(), 
                 mainEmail= user.email(),
                 teeShirtSize = str(TeeShirtSize.NOT_SPECIFIED),
