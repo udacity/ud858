@@ -99,6 +99,8 @@ class ConferenceApi(remote.Service):
                     val = getattr(save_request, field)
                     if val:
                         setattr(prof, field, str(val))
+            # TODO 4
+            # put the modified profile to datastore
 
         # return ProfileForm
         return self._copyProfileToForm(prof)
