@@ -20,7 +20,6 @@ from google.appengine.ext import ndb
 
 class Profile(ndb.Model):
     """Profile -- User profile object"""
-    userId = ndb.StringProperty()
     displayName = ndb.StringProperty()
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
@@ -34,10 +33,9 @@ class ProfileMiniForm(messages.Message):
 
 class ProfileForm(messages.Message):
     """ProfileForm -- Profile outbound form message"""
-    userId = messages.StringField(1)
-    displayName = messages.StringField(2)
-    mainEmail = messages.StringField(3)
-    teeShirtSize = messages.EnumField('TeeShirtSize', 4)
+    displayName = messages.StringField(1)
+    mainEmail = messages.StringField(2)
+    teeShirtSize = messages.EnumField('TeeShirtSize', 3)
 
 
 class TeeShirtSize(messages.Enum):
