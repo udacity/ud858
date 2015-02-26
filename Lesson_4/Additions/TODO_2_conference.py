@@ -34,6 +34,6 @@ CONF_GET_REQUEST = endpoints.ResourceContainer(
 
         # return individual ConferenceForm object per Conference
         return ConferenceForms(
-            items=[self._copyConferenceToForm(conf, names[conf.organizerUserId]) \
+            items=[self._copyConferenceToForm(conf, "") \
             for conf in conferences]
         )
