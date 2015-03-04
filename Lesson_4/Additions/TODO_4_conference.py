@@ -8,7 +8,7 @@ def filterPlayground(self, request):
 
     # advanced filter building and usage
     # field = "city"
-    # operator = "=="
+    # operator = "="
     # value = "London"
     # f = ndb.query.FilterNode(field, operator, value)
     # q = q.filter(f)
