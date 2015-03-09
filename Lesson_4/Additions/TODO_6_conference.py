@@ -1,3 +1,5 @@
+from models import BooleanMessage
+
 # - - - Registration - - - - - - - - - - - - - - - - - - - -
 
     def _conferenceRegistration(self, request, reg=True):
