@@ -30,14 +30,6 @@ from google.appengine.api import memcache
 
 
     @endpoints.method(message_types.VoidMessage, StringMessage,
-            path='conference/announcement/put',
-            http_method='GET', name='putAnnouncement')
-    def putAnnouncement(self, request):
-        """Put Announcement into memcache"""
-        return StringMessage(data=self._cacheAnnouncement())
-
-
-    @endpoints.method(message_types.VoidMessage, StringMessage,
             path='conference/announcement/get',
             http_method='GET', name='getAnnouncement')
     def getAnnouncement(self, request):
