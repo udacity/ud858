@@ -440,14 +440,6 @@ class ConferenceApi(remote.Service):
         return StringMessage(data=memcache.get(MEMCACHE_ANNOUNCEMENTS_KEY) or "")
 
 
-    @endpoints.method(message_types.VoidMessage, StringMessage,
-            path='conference/announcement/put',
-            http_method='GET', name='putAnnouncement')
-    def putAnnouncement(self, request):
-        """Put Announcement into memcache"""
-        return StringMessage(data=self._cacheAnnouncement())
-
-
 # - - - Registration - - - - - - - - - - - - - - - - - - - -
 
     @ndb.transactional(xg=True)
@@ -537,6 +529,26 @@ class ConferenceApi(remote.Service):
     def unregisterFromConference(self, request):
         """Unregister user for selected conference."""
         return self._conferenceRegistration(request, reg=False)
+
+
+    @endpoints.method(message_types.VoidMessage, ConferenceForms,
+            path='filterPlayground',
+            http_method='GET', name='filterPlayground')
+    def filterPlayground(self, request):
+        """Filter Playground"""
+        q = Conference.query()
+        # field = "city"
+        # operator = "="
+        # value = "London"
+        # f = ndb.query.FilterNode(field, operator, value)
+        # q = q.filter(f)
+        q = q.filter(Conference.city=="London")
+        q = q.filter(Conference.topics=="Medical Innovations")
+        q = q.filter(Conference.month==6)
+
+        return ConferenceForms(
+            items=[self._copyConferenceToForm(conf, "") for conf in q]
+        )
 
 
 api = endpoints.api_server([ConferenceApi]) # register API
