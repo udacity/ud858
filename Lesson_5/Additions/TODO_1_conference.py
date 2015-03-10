@@ -1,3 +1,5 @@
+from google.appengine.api import memcache
+
 # - - - Announcements - - - - - - - - - - - - - - - - - - - -
 
     @staticmethod
@@ -28,16 +30,21 @@
 
 
     @endpoints.method(message_types.VoidMessage, StringMessage,
-            path='conference/announcement/get',
-            http_method='GET', name='getAnnouncement')
-    def getAnnouncement(self, request):
-        """Return Announcement from memcache."""
-        return StringMessage(data=memcache.get(MEMCACHE_ANNOUNCEMENTS_KEY) or "")
-
-
-    @endpoints.method(message_types.VoidMessage, StringMessage,
             path='conference/announcement/put',
             http_method='GET', name='putAnnouncement')
     def putAnnouncement(self, request):
         """Put Announcement into memcache"""
         return StringMessage(data=self._cacheAnnouncement())
+
+
+    @endpoints.method(message_types.VoidMessage, StringMessage,
+            path='conference/announcement/get',
+            http_method='GET', name='getAnnouncement')
+    def getAnnouncement(self, request):
+        """Return Announcement from memcache."""
+        # TODO 1
+        # return an existing announcement from Memcache or an empty string.
+        announcement = ""
+        return StringMessage(data=announcement)
+
+
