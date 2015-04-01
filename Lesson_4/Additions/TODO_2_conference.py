@@ -28,12 +28,12 @@ CONF_GET_REQUEST = endpoints.ResourceContainer(
             path='queryConferences',
             http_method='POST',
             name='queryConferences')
-    def queryConferences(self, request):
-        """Query for conferences."""
-        conferences = Conference.query()
+def queryConferences(self, request):
+    """Query for conferences."""
+    conferences = Conference.query()
 
-        # return individual ConferenceForm object per Conference
-        return ConferenceForms(
-            items=[self._copyConferenceToForm(conf, "") \
-            for conf in conferences]
-        )
+     # return individual ConferenceForm object per Conference
+    return ConferenceForms(
+        items=[self._copyConferenceToForm(conf, "") \
+        for conf in conferences]
+    )
