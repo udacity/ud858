@@ -1,4 +1,10 @@
 from models import BooleanMessage
+from models import ConflictException
+
+CONF_GET_REQUEST = endpoints.ResourceContainer(
+    message_types.VoidMessage,
+    websafeConferenceKey=messages.StringField(1),
+)
 
 # - - - Registration - - - - - - - - - - - - - - - - - - - -
 

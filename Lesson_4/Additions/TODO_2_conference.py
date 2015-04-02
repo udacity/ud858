@@ -2,27 +2,6 @@ from models import ConferenceForms
 from models import ConferenceQueryForm
 from models import ConferenceQueryForms
 
-OPERATORS = {
-            'EQ':   '=',
-            'GT':   '>',
-            'GTEQ': '>=',
-            'LT':   '<',
-            'LTEQ': '<=',
-            'NE':   '!='
-            }
-
-FIELDS =    {
-            'CITY': 'city',
-            'TOPIC': 'topics',
-            'MONTH': 'month',
-            'MAX_ATTENDEES': 'maxAttendees',
-            }
-
-CONF_GET_REQUEST = endpoints.ResourceContainer(
-    message_types.VoidMessage,
-    websafeConferenceKey=messages.StringField(1),
-)
-
 
 @endpoints.method(ConferenceQueryForms, ConferenceForms,
             path='queryConferences',

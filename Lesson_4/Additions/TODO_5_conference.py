@@ -1,3 +1,20 @@
+OPERATORS = {
+            'EQ':   '=',
+            'GT':   '>',
+            'GTEQ': '>=',
+            'LT':   '<',
+            'LTEQ': '<=',
+            'NE':   '!='
+            }
+
+FIELDS =    {
+            'CITY': 'city',
+            'TOPIC': 'topics',
+            'MONTH': 'month',
+            'MAX_ATTENDEES': 'maxAttendees',
+            }
+
+
     def _getQuery(self, request):
         """Return formatted query from the submitted filters."""
         q = Conference.query()
