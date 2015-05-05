@@ -28,7 +28,6 @@ from models import ConflictException
 from models import Profile
 from models import ProfileMiniForm
 from models import ProfileForm
-from models import StringMessage
 from models import BooleanMessage
 from models import Conference
 from models import ConferenceForm
