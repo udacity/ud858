@@ -6,7 +6,7 @@
 # TODO: Enter your application id below. If you have signed up
 # using cloud.google.com/console use the "project id" for your application
 # id.
-application: your-project-id
+application: sandbox-project-1022
 version: 1
 runtime: python27
 threadsafe: true
